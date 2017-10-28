@@ -4,14 +4,11 @@ import numpy as np
 
 # novel game environment
 class Novel(gym.Env):
-    def __init__(self, doShuffle, storyFile = "src/static/savingjohn.pickle"):
+    def __init__(self, storyFile = "src/static/savingjohn.pickle"):
         self.storyPlot = {}
         self.startTiddler = ""
         with open(storyFile, "rb") as infile:
             self.storyPlot, self.startTiddler = pickle.load(infile,encoding='latin1')
-
-        self.doShuffle = doShuffle # whether actions are shuffled when they are Read()
-        self.idxShuffle = []
 
         self.storyNode = None
         #for gym
@@ -26,9 +23,44 @@ class Novel(gym.Env):
         self.params_path = ""
         self.done = False
 
-    def _step(self, action):
+    def AssignReward(ending, story = "savingjohn"):
+        if story.lower() == "savingjohn":
+            if ending.startswith("Submerged under water once more, I lose all focus."):
+                return(-10)
+            if ending.startswith("Honest to God, I don't know what I see in her."):
+                return(10)
+            if ending.startswith("Suddenly I can see the sky."):
+                return(20)
+            if ending.startswith("Suspicion fills my heart and I scream."):
+                return(-20)
+            if ending.startswith("Even now, she's there for me."):
+                return(0)
+        return (0)
 
-        return self.observation, reward, done, {"observation": self.observation}
+    #step environment
+    def _step(self, action):
+        #check the action in the possible action spaces
+        #if not, return now state.
+        possible_actions = self.get_possible_actions(self.storyNode,self.params_path)
+        if len(possible_actions) == 0:
+            self.done = True
+        if action in possible_actions:
+            #update state
+            self.tiddler = self.storyNode.links[action]
+            self.storyNode = self.storyPlot[self.tiddler]
+            self.observation = self.storyNode.text #next state
+
+        if self.tiddler == "Adam1.6": self.params_path = "Adam"
+        elif self.tiddler == "Sam10": self.params_path = "Sam"
+        elif self.tiddler == "Lucretia10": self.params_path = "Lucretia"
+        elif self.tiddler == "Cherie7": self.params_path = "Cherie"
+        elif self.tiddler == "Adam8": self.params_path = "Adam"
+        elif self.tiddler == "Sam9": self.params_path = "Cherie"
+        elif self.tiddler == "Lucretia7": self.params_path = "Cherie"
+
+        reward = AssignReward(self.storyNode.text, story = "savingjohn")
+
+        return self.observation, reward, self.done, {"observation": self.observation}
 
     @staticmethod
     def get_possible_actions(storyNode,params_path):
