@@ -6,3 +6,7 @@ env/
 src/analysis/
 
 src/__pycache__/
+
+result/
+
+*.vec

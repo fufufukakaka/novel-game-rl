@@ -1,6 +1,5 @@
 import gym
 import gym.spaces
-import numpy as np
 import pickle
 
 class StoryNode:
@@ -17,18 +16,27 @@ class Novel(gym.Env):
         with open(storyFile, "rb") as infile:
             self.storyPlot, self.startTiddler = pickle.load(infile,encoding='latin1')
 
+        t = 0
+        self.plotNumber = {}
+        for i in list(self.storyPlot.keys()):
+            self.plotNumber[i] = t
+            t += 1
+
         self.storyNode = None
         #for gym
         self.action_space = gym.spaces.Discrete(4) # action space depends on novel state
+        self.observation_space = gym.spaces.Discrete(t)
         self.observation = "" # observation. In this env, observation space is text content.
         self._reset()
 
     def _reset(self):
         self.tiddler = self.startTiddler
         self.storyNode = self.storyPlot[self.tiddler]
-        self.observation = self.storyNode.text #initial state
+        # self.observation = self.storyNode.text #initial state
+        self.observation = self.plotNumber[self.tiddler] #for plain q-learning
         self.params_path = ""
         self.done = False
+        return self.observation
 
     def AssignReward(self,ending, story):
         if story.lower() == "savingjohn":
@@ -56,7 +64,8 @@ class Novel(gym.Env):
             #update state
             self.tiddler = self.storyNode.links[action]
             self.storyNode = self.storyPlot[self.tiddler]
-            self.observation = self.storyNode.text #next state
+            # self.observation = self.storyNode.text #next state
+            self.observation = self.plotNumber[self.tiddler]
         else:
             retry = True
 
