@@ -16,17 +16,20 @@ if __name__ == "__main__":
 
     history = []
 
-    epochs = 100000
+    epochs = 1000
     e = 1
     for i in tqdm(range(epochs)):
         observation_0 = env._reset()
         done = False
         reward = 0
+        action_history = []
         while not done:
             #observation before action
             a = np.argmax(Q[observation_0,:] + np.random.randn(1,env.action_space.n)*(1.0/(e+1)))
 
             action = env.action_space.sample()
+            action_history.append(action)
+
             observation_1, reward, done, info = env._step(action)
 
             Q[observation_0,a] = (1-lr) * Q[observation_0,a] + lr * (reward + disct * np.max(Q[observation_1,:]))
@@ -37,5 +40,7 @@ if __name__ == "__main__":
                 # print("Episode finished after {} timesteps".format(e))
                 e += 1
                 history.append(reward)
+
+    pickle.dump(history,open("result/history.pickle","wb"))
     plt.plot(history)
     plt.show()

@@ -24,7 +24,7 @@ class Novel(gym.Env):
 
         self.storyNode = None
         #for gym
-        self.action_space = gym.spaces.Discrete(4) # action space depends on novel state
+        self.action_space = gym.spaces.Discrete(5) # action space depends on novel state
         self.observation_space = gym.spaces.Discrete(t)
         self.observation = "" # observation. In this env, observation space is text content.
         self._reset()
@@ -61,13 +61,17 @@ class Novel(gym.Env):
         if len(possible_actions) == 0:
             self.done = True
         if action in possible_actions:
+            # print(self.storyNode.actions[action])
             #update state
             self.tiddler = self.storyNode.links[action]
             self.storyNode = self.storyPlot[self.tiddler]
             # self.observation = self.storyNode.text #next state
             self.observation = self.plotNumber[self.tiddler]
+            #
+            # print(self.storyNode.text)
         else:
             retry = True
+            # print("retry")
 
         if self.tiddler == "Adam1.6": self.params_path = "Adam"
         elif self.tiddler == "Sam10": self.params_path = "Sam"
@@ -85,10 +89,10 @@ class Novel(gym.Env):
     def get_possible_actions(storyNode,params_path):
         actions=[]
         if storyNode.text.startswith("A wet strand of hair hinders my vision and I'm back in the water."):
-            if params_path == "Adam": actions.append(0)
-            elif params_path == "Sam": actions.append(1)
-            elif params_path == "Lucretia": actions.append(2)
-            elif params_path == "Cherie": actions.append(3)
+            if params_path == "Adam": actions.append(1)
+            elif params_path == "Sam": actions.append(2)
+            elif params_path == "Lucretia": actions.append(3)
+            elif params_path == "Cherie": actions.append(4)
         else:
             for i in range(len(storyNode.actions)):
                 actions.append(i)
