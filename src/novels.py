@@ -23,17 +23,18 @@ class Novel(gym.Env):
             t += 1
 
         self.storyNode = None
-        #for gym
+        # for gym
         self.action_space = gym.spaces.Discrete(5) # action space depends on novel state
         self.observation_space = gym.spaces.Discrete(t)
-        self.observation = "" # observation. In this env, observation space is text content.
-        self._reset()
+        self.observation = "" # In this env, observation space is text content or discrete number.
 
-    def _reset(self):
+    def _reset(self,number):
         self.tiddler = self.startTiddler
         self.storyNode = self.storyPlot[self.tiddler]
-        # self.observation = self.storyNode.text #initial state
-        self.observation = self.plotNumber[self.tiddler] #for plain q-learning
+        if number:
+            self.observation = self.plotNumber[self.tiddler] #for plain q-learning
+        else:
+            self.observation = self.storyNode.text #initial state
         self.params_path = ""
         self.done = False
         return self.observation
@@ -53,20 +54,22 @@ class Novel(gym.Env):
         return (0)
 
     #step environment
-    def _step(self, action):
-        #check the action in the possible action spaces
-        #if not, return now state.
+    def _step(self, action,number):
+        # check the action in the possible action spaces
+        # if not, return now state.
         possible_actions = self.get_possible_actions(self.storyNode,self.params_path)
         retry = False
         if len(possible_actions) == 0:
             self.done = True
         if action in possible_actions:
             # print(self.storyNode.actions[action])
-            #update state
+            # update state
             self.tiddler = self.storyNode.links[action]
             self.storyNode = self.storyPlot[self.tiddler]
-            # self.observation = self.storyNode.text #next state
-            self.observation = self.plotNumber[self.tiddler]
+            if number:
+                self.observation = self.plotNumber[self.tiddler]
+            else:
+                self.observation = self.storyNode.text #next state
             #
             # print(self.storyNode.text)
         else:

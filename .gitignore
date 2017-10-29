@@ -10,3 +10,5 @@ src/__pycache__/
 result/
 
 *.vec
+
+src/agent/__pycache__/
