@@ -1,20 +1,19 @@
-from novels import Novel,StoryNode
+from novels import NovelSavingJohn,StoryNode
 from agent.qlearning import PQNAgents
 from gym import wrappers
 import numpy as np
 import pickle
-import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 if __name__ == "__main__":
-    env = Novel()
+    env = NovelSavingJohn()
     env._reset(number=True)
     # env = wrappers.Monitor(env, 'result/experiment',force=True)
 
     agent = PQNAgents(env)
     history = []
 
-    epochs = 100
+    epochs = 100000
     e = 1
     for i in tqdm(range(epochs)):
         observation_0 = env._reset(number=True)
